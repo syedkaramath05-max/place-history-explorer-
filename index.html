@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Place History Explorer · ஊர்ப்பெயர் வரலாறு</title>
+<style>
+:root{color-scheme:dark;--bg:#000;--card:#111;--ink:#f5f1e6;--mute:#a8a396;--acc:#ffc233;--line:#2a2a2a;--chip:#1c1c1c;--water:#38d0ff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--card:#111;--ink:#f5f1e6;--mute:#a8a396;--acc:#ffc233;--line:#2a2a2a;--chip:#1c1c1c;--water:#38d0ff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#000;--card:#111;--ink:#f5f1e6;--mute:#a8a396;--acc:#ffc233;--line:#2a2a2a;--chip:#1c1c1c;--water:#38d0ff;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Tamil",system-ui,sans-serif;line-height:1.6}
+main{max-width:820px;margin:0 auto;padding:18px 14px 50px}
+h1{font-size:1.5rem;margin:.1em 0;color:var(--acc)}
+h2{font-size:1.1rem;margin:0 0 8px;color:var(--acc)}
+.sub,.mute{color:var(--mute);font-size:.9rem}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text],select{font:inherit;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+input[type=text]{flex:1;min-width:180px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 16px;background:var(--acc);color:#000;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chips button{background:var(--chip);color:var(--ink);padding:5px 11px;font-size:.88rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;margin:13px 0}
+.item{border-top:1px dashed var(--line);padding:8px 0}.item:first-of-type{border-top:0}
+.tag{display:inline-block;background:var(--chip);border-radius:12px;padding:1px 9px;font-size:.78rem;margin-right:5px}
+.low{outline:1px solid var(--acc)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.cols{grid-template-columns:1fr}}
+.tl{border-left:3px solid var(--acc);padding-left:13px;margin-left:5px}
+.tl .e{position:relative;margin-bottom:11px}
+.tl .e:before{content:"";position:absolute;left:-20px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--acc)}
+.tl .e.s3:before{width:14px;height:14px;left:-22px;top:5px}
+.tl .e.n:before{background:var(--water)}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.yr{font-size:2rem;font-weight:700;color:var(--acc)}
+svg{width:100%;height:auto;display:block;background:var(--chip);border-radius:12px}
+a{color:var(--acc)}
+#load{display:none}
+#wel{position:fixed;inset:0;z-index:50;background:#000;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));text-align:center;overflow:auto}
+.wb{max-width:640px}.wt{font-size:2.2rem;font-weight:700;color:var(--acc)}.ws{color:var(--mute);margin:6px 0 22px}
+.wk{font-size:1.5rem;line-height:1.7;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0}
+.wn{color:var(--mute);font-size:.9rem;margin:8px 0 20px}.wd{min-height:3.4em;font-size:1.1rem;color:var(--water);margin-bottom:22px}
+#wel button{margin:4px}
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#0a0620;--card:#170f3a;--ink:#fff4e6;--mute:#b9aedc;--acc:#ffb020;--line:#3a2a7a;--chip:#2a1c5e;--water:#2ee6d6;color-scheme:dark}
+body{background:linear-gradient(135deg,#0a0620,#34095a,#08305a,#4a0a36,#0a0620);background-size:300% 300%;background-attachment:fixed;animation:bg 20s ease infinite}
+@keyframes bg{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+h1,.wt{background:linear-gradient(90deg,#ffb020,#ff4fa3,#2ee6d6,#ffb020);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+button{background:linear-gradient(90deg,#ff9f1c,#ff4fa3);color:#fff}
+.card{background:rgba(23,15,58,.78);backdrop-filter:blur(6px);transition:box-shadow .3s}
+.card:hover{box-shadow:0 0 22px rgba(255,79,163,.35)}
+main{position:relative;z-index:1}
+#fl{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:49}
+#fl span{position:absolute;bottom:-80px;opacity:0;font-weight:700;animation:fl linear infinite}
+@keyframes fl{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:.4}90%{opacity:.25}100%{transform:translateY(-120vh) rotate(360deg);opacity:0}}
+#wel{background:radial-gradient(circle at 50% 30%,rgba(90,20,120,.82),rgba(8,4,30,.92));backdrop-filter:blur(6px)}
+.wo{position:relative;width:250px;height:250px;margin:0 auto 14px}
+.orb{position:absolute;inset:0;animation:spin 26s linear infinite,zin 1.8s ease-out both}
+.orb span{position:absolute;left:50%;top:50%;margin:-1rem;font-size:1.7rem;font-weight:700;color:hsl(calc(var(--i)*30),95%,68%);transform:rotate(calc(var(--i)*30deg)) translateY(-108px)}
+.core{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.6rem;font-weight:700;color:#ffb020;text-shadow:0 0 28px #ff4fa3;animation:zin 1.8s ease-out both,pulse 3s ease-in-out 2s infinite}
+.tg{position:absolute;bottom:-6px;left:0;right:0;font-size:.8rem;color:var(--water)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes zin{from{transform:scale(0) rotate(-180deg);opacity:0}to{opacity:1}}
+@keyframes pulse{50%{transform:scale(1.12)}}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.wt{animation:shine 6s linear infinite,up 1s 1.3s both}.ws{animation:up 1s 1.8s both}.wk{animation:up 1s 2.3s both}.wn,.wd{animation:up 1s 2.7s both}#wel button{animation:up 1s 3.1s both}
+
+/* ===== v2 upgrade ===== */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--acc2:#ff4fa3;--g1:#0a0620;--g2:#34095a;--g3:#08305a;--g4:#4a0a36;--w1:rgba(90,20,120,.82);--w2:rgba(8,4,30,.94);--btn:#fff}
+html[data-th="ocean"]:root:root{--acc:#38d0ff;--acc2:#7c6bff;--water:#5effc4;--ink:#eaf8ff;--mute:#9fc0d6;--card:#071a33;--line:#1b4a7a;--chip:#0d2c52;--g1:#020617;--g2:#06284a;--g3:#0a4a6e;--g4:#10265e;--w1:rgba(10,60,110,.8);--w2:rgba(2,8,28,.94)}
+html[data-th="forest"]:root:root{--acc:#7dffb0;--acc2:#ffd84d;--water:#4de0ff;--ink:#effff4;--mute:#a4c9b2;--card:#06261b;--line:#1f6a47;--chip:#0b3a2a;--g1:#021a12;--g2:#06402c;--g3:#0b3a3f;--g4:#103a1a;--w1:rgba(10,80,50,.8);--w2:rgba(2,16,10,.94)}
+html[data-th="royal"]:root:root{--acc:#ffd36b;--acc2:#ff5c6c;--water:#8fd0ff;--ink:#fff1dc;--mute:#d2b3a8;--card:#2a0a14;--line:#7a2a3a;--chip:#4a1424;--g1:#1a0505;--g2:#4a0d1a;--g3:#2a0a3a;--g4:#5a1a0a;--w1:rgba(110,20,40,.8);--w2:rgba(26,4,6,.94)}
+html[data-th="sandal"]:root:root{color-scheme:light;--acc:#b4440e;--acc2:#e8891c;--water:#0b7a9c;--ink:#3a2412;--mute:#7a6049;--card:#fffaf0;--line:#e3cfa6;--chip:#f3e4c2;--g1:#fff3d6;--g2:#ffe0b0;--g3:#fde7d0;--g4:#f8e8b8;--w1:rgba(255,238,200,.96);--w2:rgba(250,226,170,.98)}
+body{background:linear-gradient(135deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g1));background-size:300% 300%;background-attachment:fixed;animation:bg 22s ease infinite}
+h1,.wt{background:linear-gradient(90deg,var(--acc),var(--acc2),var(--water),var(--acc));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent}
+button{background:linear-gradient(90deg,var(--acc),var(--acc2));color:var(--btn);transition:transform .2s,box-shadow .2s,filter .2s}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 22px -6px var(--acc2);filter:brightness(1.08)}button:active{transform:scale(.96)}
+.chips button,#wnk,#er{background:var(--chip)!important;color:var(--ink)!important}
+#wel{background:radial-gradient(circle at 50% 30%,var(--w1),var(--w2))}
+#fl span{color:var(--acc)!important;opacity:.0}
+main{padding-top:64px}
+h1{font-size:clamp(1.4rem,5vw,2.1rem);letter-spacing:.2px}
+input[type=text],select,textarea{transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 30%,transparent)}
+.card{border-radius:18px;box-shadow:0 10px 30px -18px #000}
+.rv{opacity:0;transform:translateY(26px) scale(.985);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}.rv.in{opacity:1;transform:none}
+#top{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:60;display:flex;gap:8px;align-items:center;background:color-mix(in srgb,var(--card) 80%,transparent);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:30px;padding:6px 10px}
+#top button.sw{width:22px;height:22px;padding:0;border-radius:50%;border:2px solid var(--line)}
+#top button.sw.on{border-color:var(--ink);transform:scale(1.2)}
+#top .ib2{padding:3px 9px;font-size:.85rem;border-radius:20px;background:var(--chip);color:var(--ink)}
+#prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:70;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--water))}
+#glow{position:fixed;width:340px;height:340px;margin:-170px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,color-mix(in srgb,var(--acc2) 22%,transparent),transparent 65%);transition:opacity .4s;left:50%;top:30%}
+#up{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;width:44px;height:44px;border-radius:50%;padding:0;opacity:0;pointer-events:none;transition:opacity .3s}#up.s{opacity:1;pointer-events:auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0}@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+.st{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center;position:relative;overflow:hidden}
+.st:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,color-mix(in srgb,var(--acc) 18%,transparent),transparent 70%);transform:translateX(-100%);animation:sw 3.5s ease-in-out infinite}@keyframes sw{60%,100%{transform:translateX(100%)}}
+.st b{display:block;font-size:1.8rem;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}.st span{font-size:.8rem;color:var(--mute)}
+.act button{padding:8px 13px;font-size:.88rem}.act button.on{box-shadow:0 0 0 2px var(--water)}
+#load{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0;text-align:center}
+.ld{display:flex;align-items:center;justify-content:center;gap:12px;font-size:1rem}.ld b{font-size:2.2rem;color:var(--acc);display:inline-block;animation:flip 1.2s ease-in-out infinite}@keyframes flip{50%{transform:rotateY(180deg) scale(1.2)}}
+.bar{height:5px;background:var(--chip);border-radius:5px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:5px;animation:slide 1.4s ease-in-out infinite}@keyframes slide{from{margin-left:-40%}to{margin-left:100%}}
+.fl2{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}.fl2 button{padding:4px 11px;font-size:.82rem;background:var(--chip);color:var(--ink)}.fl2 button.on{background:linear-gradient(90deg,var(--acc),var(--acc2));color:var(--btn)}
+.tl .e{transition:opacity .3s,transform .3s}.tl .e.hid{display:none}.tl .e:hover:before{box-shadow:0 0 0 6px color-mix(in srgb,var(--acc) 30%,transparent)}
+.tl .e:before{transition:box-shadow .3s}.tl .e.s3 b{font-size:1.05rem}
+.ans{white-space:pre-wrap;margin-top:10px;line-height:1.7}
+#intro{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 42%,#1d0a45,#05020f 70%);transition:opacity .9s,transform .9s,filter .9s}
+#intro.out{opacity:0;transform:scale(1.25);filter:blur(10px);pointer-events:none}
+#ic{position:absolute;inset:0;width:100%;height:100%}
+#it{position:absolute;left:0;right:0;bottom:calc(9% + env(safe-area-inset-bottom,0px));text-align:center;color:#ffd9a0;letter-spacing:3px;font-size:.95rem}
+#it .pb{width:min(260px,60vw);height:3px;background:#ffffff22;margin:12px auto 0;border-radius:3px;overflow:hidden}#it .pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb020,#ff4fa3,#2ee6d6);animation:fill 4.4s linear forwards}@keyframes fill{to{width:100%}}
+#isk{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;background:#ffffff18;color:#fff;padding:6px 14px;font-size:.85rem;border:1px solid #ffffff30}
+.rg{position:absolute;left:50%;top:42%;width:10px;height:10px;margin:-5px;border-radius:50%;border:1.5px solid #ffb02088;animation:rg 3.6s ease-out infinite}.rg:nth-child(2){animation-delay:1.2s;border-color:#ff4fa388}.rg:nth-child(3){animation-delay:2.4s;border-color:#2ee6d688}@keyframes rg{to{transform:scale(90);opacity:0}}
+body:not(.ready) #wel *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){#intro{display:none}}
+</style>
+</head>
+<body>
+<div id="prog"></div><div id="glow"></div>
+<div id="intro"><i class="rg"></i><i class="rg"></i><i class="rg"></i><canvas id="ic"></canvas><div id="it">ஊர்ப்பெயர் வரலாறு<div class="pb"><i></i></div></div><button id="isk">Skip ›</button></div>
+<div id="top"><button class="sw" data-t="" style="background:linear-gradient(135deg,#ffb020,#ff4fa3)" title="Sunset"></button><button class="sw" data-t="ocean" style="background:linear-gradient(135deg,#38d0ff,#7c6bff)" title="Ocean"></button><button class="sw" data-t="forest" style="background:linear-gradient(135deg,#7dffb0,#ffd84d)" title="Forest"></button><button class="sw" data-t="royal" style="background:linear-gradient(135deg,#ffd36b,#ff5c6c)" title="Royal"></button><button class="sw" data-t="sandal" style="background:linear-gradient(135deg,#fff3d6,#b4440e)" title="Sandal light"></button><button class="ib2" id="fvb">⭐ <span id="fvn">0</span></button></div>
+<button id="up">↑</button>
+<div id="wel"><div class="wb"><div class="wo"><div class="orb" id="orb"></div><div class="core">தமிழ்</div><div class="tg">செம்மொழி · 2000+ ஆண்டு இலக்கிய மரபு</div></div><div class="wt">வணக்கம்! வருக வருக!</div><div class="ws">ஊர்ப்பெயர் வரலாறு · Place History Explorer</div><div class="wk" id="wk"></div><div class="wn" id="wn"></div><div class="wd" id="wd"></div><button id="wgo">உள்ளே செல் →</button><button id="wnk" style="background:var(--chip);color:var(--ink)">வேறு குறள்</button><button id="wsp">🔊 குறளை வாசி</button></div></div>
+<main>
+<h1>Place History Explorer · ஊர்ப்பெயர் வரலாறு</h1>
+<p class="sub">Type any city, village, river, lake or street in Tamil Nadu (or anywhere). Get old and new names, who changed them and why, sources, water bodies, a timeline and a year-slider map.</p>
+<div class="row">
+<input id="q" type="text" placeholder="e.g. Madurai, Chennai, Poompuhar, கூவம் ஆறு" autocomplete="off">
+<select id="lang"><option value="Auto">Auto (same as my typing)</option><option value="English">English</option><option value="Tamil">தமிழ்</option></select>
+<button id="go">Search</button>
+</div>
+<div class="chips" id="chips"></div>
+<div class="row" style="align-items:center"><button id="mic">🎤 Speak / பேசுங்கள்</button><label class="mute"><input type="checkbox" id="vo"> 🔊 Read answers aloud / பதிலை வாசி</label></div>
+<div id="load"><div class="ld"><b id="lg">அ</b><span id="lt"></span></div><div class="bar"><i></i></div></div>
+<div id="out"></div>
+<div class="card"><h2>Evidence Lab: compare your own sources</h2><p class="mute">Paste text from an inscription reading, an old map legend, a gazetteer or any document. Add two or more sources, then compare. The AI builds a timeline using only what your sources show.</p><div class="row"><input id="es" type="text" placeholder="Source title (e.g. Survey map of Madras, 1822)"><input id="ey" type="text" placeholder="Year" style="flex:0 0 90px;min-width:90px"><select id="et"><option>inscription</option><option>old map</option><option>document</option><option>palm-leaf</option><option>book</option></select></div><textarea id="ex" rows="3" style="width:100%;margin-top:8px;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)" placeholder="Paste the text or the place-name lines here"></textarea><div class="row" style="margin-top:8px"><button id="ea">Add source</button><button id="ec">Compare and build evidence timeline</button><button id="er" style="background:var(--chip);color:var(--ink)">Clear</button></div><div id="el"></div><div id="eo"></div></div>
+<p class="mute">Answers are generated by Claude from its knowledge of books, inscriptions, gazetteers and palm-leaf (ōlaichuvadi) literature. It cannot open those documents live, so dates and names marked "low confidence" must be checked against the sources listed. Photos and live old maps are not embedded here; use the archive links under the map.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const E=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;};
+["Madurai","Chennai","Thanjavur","Poompuhar","Kanchipuram","Coimbatore","Ooty","Kooum river","Tirunelveli","Tuticorin"].forEach(n=>{const b=E("button",null,n);b.onclick=()=>{$("q").value=n;run()};$("chips").appendChild(b);});
+$("go").onclick=run;$("q").addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+const K=[["அகர முதல எழுத்தெல்லாம் ஆதி","பகவன் முதற்றே உலகு.","திருக்குறள் 1 · கடவுள் வாழ்த்து"],["கற்க கசடறக் கற்பவை கற்றபின்","நிற்க அதற்குத் தக.","திருக்குறள் 391 · கல்வி"],["எண்ணென்ப ஏனை எழுத்தென்ப இவ்விரண்டும்","கண்ணென்ப வாழும் உயிர்க்கு.","திருக்குறள் 392 · கல்வி"],["தொட்டனைத் தூறும் மணற்கேணி மாந்தர்க்குக்","கற்றனைத் தூறும் அறிவு.","திருக்குறள் 396 · கல்வி"],["எப்பொருள் எத்தன்மைத் தாயினும் அப்பொருள்","மெய்ப்பொருள் காண்பது அறிவு.","திருக்குறள் 423 · அறிவுடைமை"],["யாதும் ஊரே யாவரும் கேளிர்","தீதும் நன்றும் பிறர்தர வாரா.","புறநானூறு 192 · கணியன் பூங்குன்றனார்"]];
+const R=["ஊரின் பெயரில் உண்மை உறங்கும்; தேடிப் பார்த்தால் வரலாறு பிறக்கும்!","கல்லில் கண்டால் காலம் சொல்லும்; ஓலையில் கண்டால் உண்மை வெல்லும்!","பழைய பெயரில் பாசம் உண்டு; புதிய பெயரில் பயணம் உண்டு!","ஆறு பாயும் ஊரின் வேர்; அறிவு பாயும் தமிழின் தேர்!","பெயர் மாறலாம், பெருமை மாறுமா? வரலாறு தேடினால் வழி தோன்றுமே!"];
+let ki=Math.floor(Math.random()*K.length),ri=0;
+function showK(){const k=K[ki%K.length];$("wk").textContent="";k.slice(0,2).forEach(l=>$("wk").appendChild(E("div",null,l)));$("wn").textContent=k[2];}
+function showR(){$("wd").textContent=R[ri++%R.length];}
+showK();showR();const tm=setInterval(showR,4000);
+$("wnk").onclick=()=>{ki++;showK()};
+$("wgo").onclick=()=>{clearInterval(tm);$("wel").style.display="none"};
+const V='அஆஇஈஉஊஎஏஐஒஓஔ'.split('');
+V.forEach((c,i)=>{const s=E('span',null,c);s.style.setProperty('--i',i);$('orb').appendChild(s);});
+const FL='அஆஇஈஉஊஎஏஐஒஓஔகஙசஞடணதநபமயரலவழளறனௐ'.split('');
+const fl=E('div');fl.id='fl';document.body.prepend(fl);
+for(let i=0;i<34;i++){const s=E('span',null,FL[i%FL.length]);s.style.cssText='left:'+Math.random()*96+'%;font-size:'+(20+Math.random()*50)+'px;color:hsl('+Math.random()*360+',90%,68%);animation-duration:'+(14+Math.random()*18)+'s;animation-delay:-'+Math.random()*30+'s';fl.appendChild(s);}
+document.addEventListener('pointerdown',e=>{for(let i=0;i<8;i++){const s=E('span',null,FL[Math.random()*FL.length|0]);s.style.cssText='position:fixed;left:'+e.clientX+'px;top:'+e.clientY+'px;z-index:99;pointer-events:none;font-size:22px;font-weight:700;color:hsl('+Math.random()*360+',90%,65%)';document.body.appendChild(s);const a=Math.random()*6.28,d=40+Math.random()*80;s.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+Math.cos(a)*d+'px,'+Math.sin(a)*d+'px) scale(.3) rotate(240deg)',opacity:0}],{duration:900}).onfinish=()=>s.remove();}});
+function say(t){try{const s=window.speechSynthesis;s.cancel();const u=new SpeechSynthesisUtterance(t);const ta=/[\u0B80-\u0BFF]/.test(t);u.lang=ta?'ta-IN':'en-IN';const v=s.getVoices().find(x=>x.lang.replace('_','-').toLowerCase().startsWith(ta?'ta':'en-in'));if(v)u.voice=v;u.rate=.9;s.speak(u);}catch(e){}}
+$('wsp').onclick=()=>say(K[ki%K.length].slice(0,2).join('. '));
+$('wgo').addEventListener('click',()=>{$('fl').style.zIndex=0;try{speechSynthesis.cancel()}catch(e){}});
+const MT='🎤 Speak / பேசுங்கள்';
+$('mic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Voice input is not supported here. Try Chrome. / இந்த உலாவியில் குரல் உள்ளீடு இல்லை.');return;}const r=new SR();r.lang=$('lang').value==='English'?'en-IN':'ta-IN';r.onstart=()=>{$('mic').textContent='🎤 Listening… / கேட்கிறேன்…'};r.onresult=e=>{$('q').value=e.results[0][0].transcript;run();};r.onerror=()=>{alert('Microphone is blocked or unavailable. / மைக் அனுமதி இல்லை.')};r.onend=()=>{$('mic').textContent=MT};r.start();};
+let D=null;
+const SCHEMA=`{"place":"","current_name":"","type":"city|town|village|river|lake|street|other","district_or_region":"","lat":0,"lng":0,
+"summary":"2-3 sentences",
+"names":[{"name":"","script_or_language":"","period":"","meaning":"","who_named_or_changed":"","why":"","how":"","confidence":"high|medium|low"}],
+"name_timeline":[{"year":0,"name":"name in common use from this year"}],
+"tourism":{"old":[{"place":"","note":""}],"new":[{"place":"","note":""}]},
+"sources":[{"title":"","kind":"book|inscription|palm-leaf|gazetteer|map|literature|government order","note":""}],
+"water":[{"name":"","old_name":"","origin_of_name":"","named_by":"","year":"","note":""}],
+"maps":{"old":"what old maps/surveys show, with names of maps and years","new":"what current maps show"},
+"timeline":[{"year":0,"title":"","detail":"","importance":1,"kind":"name|event|water|culture","confidence":"high|medium|low","source":"book, inscription or map that supports this entry"}]}`;
+async function askPlaceAI(mode, prompt){
+ const response = await fetch('/.netlify/functions/ask', {
+  method: 'POST',
+  headers: {'Content-Type':'application/json'},
+  body: JSON.stringify({mode, prompt})
+ });
+ const data = await response.json().catch(()=>({error:'The server returned an unreadable response.'}));
+ if(!response.ok) throw new Error(data.error || ('Request failed ('+response.status+').'));
+ if(typeof data.text !== 'string') throw new Error('The AI response was empty. Please try again.');
+ return data.text;
+}
+async function run(){
+ const q=$("q").value.trim();if(!q)return;
+ const out=$("out");out.textContent="";loadOn();
+ const L=getLang(q);
+ const p=`You are a historian of Tamil place names. Place asked: "${q}". Write all text values in ${L} (keep original-script names too). Return ONLY JSON in exactly this shape: ${SCHEMA}
+Rules: be accurate; use negative numbers for BCE years and approximate centuries as a representative year; never invent inscriptions, quotes or exact dates; if unsure set confidence to "low" or leave the value as "unknown". Include 8-14 timeline entries from earliest times to 2026, sorted by year, importance 1-3 (3 = most important). For ancient places include literary events (e.g. Silappatikaram for Madurai/Kannagi) with period noted. In name_timeline give every name change with the year. In "names" cover all old and new names with who/why/how. Cover sources like Sangam literature, inscriptions, palm-leaf manuscripts, gazetteers, colonial surveys. If the place is a river, fill "water" with the river itself plus tributaries or related lakes. If it is not a water body, list nearby rivers, lakes or tanks. If the place is unknown, return {"error":"explanation"}.`;
+ try{
+  const answer=await askPlaceAI("history",p);
+  D=JSON.parse(answer);
+ }catch(e){loadOff();out.appendChild(E("div","card","Could not get a result: "+(e.message||"unknown error")+". Please try again."));return;}
+ loadOff();
+ if(!D||D.error){out.appendChild(E("div","card",(D&&D.error)||"No result."));return;}
+ render(D);post(D);if($('vo').checked)say([D.place,D.summary].join('. '));
+}
+function conf(c){const s=E("span","tag"+(c==="low"?" low":""),c?c+" confidence":"");return s;}
+function sec(title){const c=E("div","card");c.appendChild(E("h2",null,TR(title)));$("out").appendChild(c);return c;}
+function link(t,u){const a=E("a",null,t);a.href=u;a.target="_blank";a.rel="noopener";return a;}
+function nameAt(y){const nt=(D.name_timeline||[]).slice().sort((a,b)=>a.year-b.year);let n=null;nt.forEach(x=>{if(x.year<=y)n=x.name});return n||(nt[0]?nt[0].name+" (earliest recorded)":D.current_name);}
+function render(d){
+ const o=$("out");
+ let c=sec(d.place+(d.current_name&&d.current_name!==d.place?" → "+d.current_name:""));
+ c.appendChild(E("div","mute",[d.type,d.district_or_region].filter(Boolean).join(" · ")));
+ c.appendChild(E("p",null,d.summary||""));
+ c=sec("Names: old and new, who changed them, why and how");
+ (d.names||[]).forEach(n=>{const i=E("div","item");const b=E("b",null,n.name);i.appendChild(b);i.appendChild(document.createTextNode("  "));i.appendChild(E("span","tag",n.period||""));i.appendChild(conf(n.confidence));
+  [["Language",n.script_or_language],["Meaning",n.meaning],["Who",n.who_named_or_changed],["Why",n.why],["How",n.how]].forEach(([k,v])=>{if(v&&v!=="unknown"){const l=E("div","mute");l.textContent=k+": "+v;i.appendChild(l);}});
+  c.appendChild(i);});
+ c=sec("Tourism: then and now");const g=E("div","cols");
+ [["Old times",(d.tourism||{}).old],["Present day",(d.tourism||{}).new]].forEach(([h,arr])=>{const col=E("div");col.appendChild(E("b",null,h));(arr||[]).forEach(t=>{const i=E("div","item");i.appendChild(E("b",null,t.place));i.appendChild(E("div","mute",t.note));col.appendChild(i);});g.appendChild(col);});c.appendChild(g);
+ c=sec("Books, inscriptions and palm-leaf (ōlaichuvadi) sources");
+ (d.sources||[]).forEach(s=>{const i=E("div","item");i.appendChild(E("span","tag",s.kind));i.appendChild(E("b",null,s.title));i.appendChild(E("div","mute",s.note));c.appendChild(i);});
+ c=sec("Water bodies: how the names came");
+ (d.water||[]).forEach(w=>{const i=E("div","item");i.appendChild(E("b",null,w.name));if(w.old_name&&w.old_name!=="unknown")i.appendChild(E("span","tag","old: "+w.old_name));
+  [["Origin of name",w.origin_of_name],["Named by",w.named_by],["Year",w.year],["Note",w.note]].forEach(([k,v])=>{if(v&&v!=="unknown")i.appendChild(E("div","mute",k+": "+v));});c.appendChild(i);});
+ c=sec("Old map vs new map");const m=d.maps||{};
+ const g2=E("div","cols");[["Old maps",m.old],["Current maps",m.new]].forEach(([h,t])=>{const col=E("div");col.appendChild(E("b",null,h));col.appendChild(E("p","mute",t||"unknown"));g2.appendChild(col);});c.appendChild(g2);
+ c=sec("Timeline");const tl=E("div","tl");
+ (d.timeline||[]).slice().sort((a,b)=>a.year-b.year).forEach(e=>{const r=E("div","e s"+(e.importance||1)+(e.kind==="name"?" n":""));
+  r.appendChild(E("b",null,fy(e.year)+" · "+e.title+(e.importance>=3?" ★":"")));r.appendChild(conf(e.confidence));r.appendChild(E("div","mute",e.detail));if(e.source)r.appendChild(E("div","mute","Evidence: "+e.source));tl.appendChild(r);});
+ c.appendChild(tl);
+ slider(d);
+}
+const EV=[];
+function drawEL(){const l=$("el");l.textContent="";EV.forEach((s,i)=>{const d=E("div","item");d.appendChild(E("span","tag","S"+(i+1)));d.appendChild(E("b",null,s.title+" ("+s.year+", "+s.type+")"));d.appendChild(E("div","mute",s.text.slice(0,140)+(s.text.length>140?"…":"")));l.appendChild(d);});}
+$("ea").onclick=()=>{const t=$("ex").value.trim();if(!t)return;EV.push({title:$("es").value.trim()||"Untitled",year:$("ey").value.trim()||"undated",type:$("et").value,text:t});$("ex").value="";drawEL();};
+$("er").onclick=()=>{EV.length=0;drawEL();$("eo").textContent="";};
+$("ec").onclick=async()=>{
+ const o=$("eo");o.textContent="";
+ if(EV.length<2){o.appendChild(E("p","mute","Add at least two sources first."));return;}
+ o.appendChild(E("p","mute","Comparing sources…"));
+ const src=EV.map((s,i)=>"S"+(i+1)+" ["+s.type+", "+s.year+"] "+s.title+":\n"+s.text).join("\n\n");
+ const p="You are an epigraphist and historical geographer. Compare ONLY the supplied sources below to find how a place name changed. Write in "+getLang(EV.map(s=>s.title+" "+s.text).join(" "))+".\n\n"+src+"\n\nReturn ONLY JSON: {\"variants\":[{\"normalized\":\"\",\"forms\":[{\"form\":\"\",\"source\":\"S1\",\"year\":\"\"}]}],\"changes\":[{\"from\":\"\",\"to\":\"\",\"type\":\"phonetic drift|translation|re-naming|anglicization|standardization|other\",\"earliest_evidence\":\"S#\",\"latest_evidence\":\"S#\",\"window\":\"change happened between which years\",\"explanation\":\"\",\"strength\":\"strong|moderate|weak\"}],\"timeline\":[{\"year\":\"\",\"event\":\"\",\"sources\":[\"S1\"]}],\"conflicts_and_gaps\":[\"\"],\"background_note\":\"\"}. Rules: every claim in variants, changes and timeline must come from the supplied sources and cite S numbers. Do not invent dates. Say that the exact year of a change is unknown when the sources only bracket it. Put anything from your own background knowledge only in background_note, labelled as not from the supplied sources. Note conflicts between sources and missing evidence.";
+ let r;try{r=JSON.parse(await askPlaceAI("evidence",p));}catch(e){o.textContent="";o.appendChild(E("p","mute","Could not compare: "+(e.message||"unknown error")+". Try again."));return;}
+ o.textContent="";
+ const H=t=>{const h=E("h2",null,TR(t));h.style.marginTop="14px";o.appendChild(h);};
+ H("Name variants found");(r.variants||[]).forEach(v=>{const i=E("div","item");i.appendChild(E("b",null,v.normalized));(v.forms||[]).forEach(f=>i.appendChild(E("div","mute",f.form+" · "+f.source+" · "+f.year)));o.appendChild(i);});
+ H("Detected changes");(r.changes||[]).forEach(c=>{const i=E("div","item");i.appendChild(E("b",null,c.from+" → "+c.to));i.appendChild(E("span","tag",c.type));i.appendChild(E("span","tag"+(c.strength==="weak"?" low":""),c.strength+" evidence"));i.appendChild(E("div","mute","Between "+c.earliest_evidence+" and "+c.latest_evidence+" · "+c.window));i.appendChild(E("div","mute",c.explanation));o.appendChild(i);});
+ H("Evidence-based timeline");const tl=E("div","tl");(r.timeline||[]).forEach(e=>{const row=E("div","e");row.appendChild(E("b",null,e.year+" · "+(e.sources||[]).join(", ")));row.appendChild(E("div","mute",e.event));tl.appendChild(row);});o.appendChild(tl);
+ if((r.conflicts_and_gaps||[]).length){H("Conflicts and gaps");r.conflicts_and_gaps.forEach(g=>o.appendChild(E("div","item",g)));}
+ if(r.background_note){H("Background (not from your sources)");o.appendChild(E("p","mute",r.background_note));}
+};
+let CURL="English";
+function getLang(t){const v=$("lang").value;CURL=v!=="Auto"?v:(/[\u0B80-\u0BFF]/.test(t)?"Tamil":"English");return CURL;}
+const TA={"Names: old and new, who changed them, why and how":"பெயர்கள்: பழையவை, புதியவை, யார் மாற்றினார், ஏன், எப்படி","Tourism: then and now":"சுற்றுலா: அன்றும் இன்றும்","Books, inscriptions and palm-leaf (ōlaichuvadi) sources":"நூல்கள், கல்வெட்டுகள், ஓலைச்சுவடி ஆதாரங்கள்","Water bodies: how the names came":"நீர்நிலைகள்: பெயர்கள் வந்த விதம்","Old map vs new map":"பழைய வரைபடம் – புதிய வரைபடம்","Timeline":"காலவரிசை","Time-slider map: drag the year":"ஆண்டு வரைபடம்: ஆண்டை இழுக்கவும்","Name variants found":"கண்டறிந்த பெயர் வடிவங்கள்","Detected changes":"கண்டறிந்த மாற்றங்கள்","Evidence-based timeline":"ஆதார அடிப்படையிலான காலவரிசை","Conflicts and gaps":"முரண்பாடுகளும் இடைவெளிகளும்","Background (not from your sources)":"பின்னணி (உங்கள் ஆதாரங்களில் இல்லாதது)","Name in use: ":"அன்று வழங்கிய பெயர்: ","What was happening around ":"நடந்தவை, ஆண்டு "};
+function TR(s){return CURL==="Tamil"&&TA[s]?TA[s]:s;}
+function fy(y){return y<0?(-y)+" BCE":(y<1000?"~"+y+" CE":String(y));}
+function slider(d){
+ const ys=(d.timeline||[]).map(e=>e.year).concat((d.name_timeline||[]).map(e=>e.year));
+ const min=Math.min(1800,...ys),max=2026;
+ const c=sec("Time-slider map: drag the year");
+ const yr=E("div","yr","");const nm=E("div",null,"");nm.style.fontWeight="600";
+ const rg=E("input");rg.type="range";rg.min=min;rg.max=max;rg.step=min<1000?10:1;rg.value=1800;
+ const row=E("div","row");
+ [["1800",1800],["1900",1900],["1944",1944],["2026",2026]].forEach(([t,v])=>{const b=E("button",null,t);b.style.padding="4px 10px";b.onclick=()=>{rg.value=v;upd()};row.appendChild(b);});
+ if(min<1800){const b=E("button",null,"Earliest");b.style.padding="4px 10px";b.onclick=()=>{rg.value=min;upd()};row.appendChild(b);}
+ const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 600 220");
+ const ev=E("div"),lk=E("div","mute");
+ c.append(yr,nm,rg,row,svg,ev,lk);
+ function upd(){
+  const y=+rg.value;yr.textContent=fy(y);const n=nameAt(y);nm.textContent=TR("Name in use: ")+n;
+  svg.textContent="";const ns="http://www.w3.org/2000/svg";
+  const add=(t,a,x)=>{const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(x)e.textContent=x;svg.appendChild(e);return e;};
+  const age=Math.max(0,(y-min)/(max-min));
+  add("circle",{cx:300,cy:105,r:20+age*55,fill:"var(--acc)","fill-opacity":.12,stroke:"var(--acc)","stroke-dasharray":"4 4"});
+  add("path",{d:"M0 175 C120 140 200 200 320 165 S520 150 600 185",fill:"none",stroke:"var(--water)","stroke-width":5,opacity:.7});
+  add("circle",{cx:300,cy:105,r:7,fill:"var(--acc)"});
+  add("text",{x:300,y:80,"text-anchor":"middle",fill:"var(--ink)","font-size":18,"font-weight":700},n.length>34?n.slice(0,34)+"…":n);
+  add("text",{x:12,y:208,fill:"var(--mute)","font-size":11},"Schematic only: ring = approximate settlement growth, blue line = water body (not to scale)");
+  const w=y>=1800?25:150;let list=(d.timeline||[]).filter(e=>Math.abs(e.year-y)<=w).sort((a,b)=>a.year-b.year);
+  if(!list.length){const s=(d.timeline||[]).slice().sort((a,b)=>Math.abs(a.year-y)-Math.abs(b.year-y))[0];if(s)list=[s];}
+  ev.textContent="";ev.appendChild(E("b",null,TR("What was happening around ")+fy(y)+":"));
+  list.forEach(e=>{const i=E("div","item");i.appendChild(E("b",null,fy(e.year)+" · "+e.title));i.appendChild(E("div","mute",e.detail));ev.appendChild(i);});
+  const pl=encodeURIComponent(d.place),yy=y>0?y:"";
+  lk.textContent="Real maps and photos: ";
+  [["Photos "+yy,"https://commons.wikimedia.org/w/index.php?search="+pl+"+"+yy],["Old maps (Rumsey)","https://www.davidrumsey.com/luna/servlet/view/search?q="+pl],["Current map","https://www.openstreetmap.org/search?query="+pl],["Archive.org","https://archive.org/search?query="+pl+"+"+yy]].forEach(([t,u],k)=>{if(k)lk.appendChild(document.createTextNode(" · "));lk.appendChild(link(t,u));});
+ }
+ rg.oninput=upd;upd();
+}
+</script>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);let done=false;
+const fin=()=>{if(done)return;done=true;const i=$('intro');if(i){i.classList.add('out');setTimeout(()=>i.remove(),1000)}document.body.classList.add('ready')};
+setTimeout(fin,7000);
+if(matchMedia('(prefers-reduced-motion:reduce)').matches){fin();return}
+$('isk').onclick=fin;$('intro').addEventListener('pointerdown',e=>{if(e.target.id!=='ic')return;mx=e.clientX*(cv._d||1);my=e.clientY*(cv._d||1)});
+const cv=$('ic'),cx=cv.getContext('2d');let W,H,P=[],mx=-1e4,my=-1e4;
+const d=Math.min(devicePixelRatio||1,2);cv._d=d;W=cv.width=innerWidth*d;H=cv.height=innerHeight*d;
+const o=document.createElement('canvas');o.width=W;o.height=H;const c=o.getContext('2d');
+const fs=Math.min(W/3.1,H/3.4);c.fillStyle='#fff';c.font='700 '+fs+'px "Noto Sans Tamil","Nirmala UI","Latha","Tamil Sangam MN",sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('தமிழ்',W/2,H*.42);
+const im=c.getImageData(0,0,W,H).data,st=Math.max(3,Math.round(W/170));
+for(let y=0;y<H;y+=st)for(let x=0;x<W;x+=st)if(im[(y*W+x)*4+3]>128){const a=Math.random()*6.28,r=Math.max(W,H)*(.5+Math.random()*.5);P.push({x:W/2+Math.cos(a)*r,y:H/2+Math.sin(a)*r,tx:x,ty:y,h:x/W*140+20+Math.random()*30,dl:Math.random()*.9,s:(1+Math.random()*1.4)*d,vx:0,vy:0})}
+// background stars
+const S=[];for(let i=0;i<90;i++)S.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4*d,p:Math.random()*6.28});
+cv.addEventListener('pointermove',e=>{mx=e.clientX*d;my=e.clientY*d});
+const t0=performance.now();
+function fr(now){if(done)return;const t=(now-t0)/1000;cx.clearRect(0,0,W,H);cx.globalCompositeOperation='lighter';
+S.forEach(s=>{cx.fillStyle='rgba(255,230,190,'+(.25+.25*Math.sin(t*2+s.p))+')';cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.3);cx.fill()});
+const burst=t>4.1;
+P.forEach(p=>{if(burst){const dx=p.x-W/2,dy=p.y-H/2,l=Math.hypot(dx,dy)||1;p.vx+=dx/l*1.6*d;p.vy+=dy/l*1.6*d;p.x+=p.vx;p.y+=p.vy}
+else{const e=Math.min(1,Math.max(0,(t-p.dl)/2.1)),k=1-Math.pow(1-e,4);
+p.x+=(p.tx-p.x)*(.04+.09*k);p.y+=(p.ty-p.y)*(.04+.09*k);
+const dx=p.x-mx,dy=p.y-my,dd=dx*dx+dy*dy,R=110*d;if(dd<R*R){const f=(1-Math.sqrt(dd)/R)*7*d,l=Math.sqrt(dd)||1;p.x+=dx/l*f;p.y+=dy/l*f}
+if(e>=1){p.x+=Math.sin(t*3+p.ty)*.25*d;p.y+=Math.cos(t*3+p.tx)*.25*d}}
+cx.fillStyle='hsla('+(p.h+t*30)+',95%,'+(62+8*Math.sin(t*4+p.tx))+'%,.9)';cx.beginPath();cx.arc(p.x,p.y,p.s,0,6.3);cx.fill()});
+if(t>4.8){fin();return}requestAnimationFrame(fr)}
+requestAnimationFrame(fr);
+})();
+
+(function(){
+const $=id=>document.getElementById(id),E=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const ls={get(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch(e){return f}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+// themes
+const th=ls.get('ph_th','');const setT=t=>{document.documentElement.dataset.th=t;ls.set('ph_th',t);document.querySelectorAll('#top .sw').forEach(b=>b.classList.toggle('on',b.dataset.t===t))};
+document.querySelectorAll('#top .sw').forEach(b=>b.onclick=()=>setT(b.dataset.t));setT(th);
+// scroll progress, back-to-top, cursor glow
+addEventListener('scroll',()=>{const h=document.documentElement,m=h.scrollHeight-innerHeight;$('prog').style.width=(m>0?scrollY/m*100:0)+'%';$('up').classList.toggle('s',scrollY>500)},{passive:true});
+$('up').onclick=()=>scrollTo({top:0,behavior:'smooth'});
+addEventListener('pointermove',e=>{const g=$('glow');g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'},{passive:true});
+addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();$('q').focus()}});
+// favourites + recent
+let FV=ls.get('ph_fv',[]),HI=ls.get('ph_hi',[]);
+const rc=E('div','chips');rc.id='rec';$('chips').after(rc);
+function drawRec(){$('fvn').textContent=FV.length;rc.textContent='';if(!FV.length&&!HI.length)return;
+FV.forEach(n=>{const b=E('button',null,'⭐ '+n);b.onclick=()=>{$('q').value=n;window.run()};rc.appendChild(b)});
+HI.filter(n=>!FV.includes(n)).slice(0,6).forEach(n=>{const b=E('button',null,'🕘 '+n);b.onclick=()=>{$('q').value=n;window.run()};rc.appendChild(b)})}
+$('fvb').onclick=()=>{rc.scrollIntoView({behavior:'smooth',block:'center'})};
+const rnd=E('button',null,'🎲 Surprise me / ஆச்சரியம்');
+const PL=['Rameswaram','Kanyakumari','Mahabalipuram','Srirangam','Kodaikanal','Vellore','Salem','Erode','Pondicherry','Madras Marina','Gangaikonda Cholapuram','Keezhadi','Kumbakonam','Nagapattinam','Hosur','Mamallapuram','Adyar river','Vaigai river','Pulicat lake','Dhanushkodi'];
+rnd.onclick=()=>{$('q').value=PL[Math.random()*PL.length|0];window.run()};$('chips').appendChild(rnd);
+// loader
+let lt=null;const LM=['Searching Sangam literature…','Reading stone inscriptions…','Unrolling palm-leaf manuscripts…','Comparing colonial survey maps…','Tracing rivers and tanks…','Drawing the timeline…'],LG='அஆஇஈஉஊஎஏஐஒஓகசதநபமயரவழ'.split('');
+window.loadOn=()=>{$('load').style.display='block';let i=0;const f=()=>{$('lt').textContent=LM[i%LM.length];$('lg').textContent=LG[Math.random()*LG.length|0];i++};f();clearInterval(lt);lt=setInterval(f,2400)};
+window.loadOff=()=>{clearInterval(lt);$('load').style.display='none'};
+// count-up
+function count(n,v){const t0=performance.now();(function s(t){const k=Math.min(1,(t-t0)/1100);n.textContent=Math.round(v*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(s)})(t0)}
+// reveal observer
+const io='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.08}):null;
+function reveal(el,i){el.classList.add('rv');el.style.transitionDelay=Math.min(i*70,350)+'ms';io?io.observe(el):el.classList.add('in')}
+const md=d=>{let s='# '+d.place+(d.current_name&&d.current_name!==d.place?' → '+d.current_name:'')+'\n\n'+(d.summary||'')+'\n\n## Names\n';(d.names||[]).forEach(n=>s+='- **'+n.name+'** ('+(n.period||'')+') '+[n.meaning,n.who_named_or_changed,n.why].filter(x=>x&&x!=='unknown').join(' · ')+'\n');s+='\n## Timeline\n';(d.timeline||[]).slice().sort((a,b)=>a.year-b.year).forEach(e=>s+='- **'+fy(e.year)+'** '+e.title+': '+e.detail+'\n');s+='\n## Sources\n';(d.sources||[]).forEach(x=>s+='- '+x.title+' ('+x.kind+'): '+x.note+'\n');return s};
+window.post=function(d){
+ const o=$('out');HI=[d.place].concat(HI.filter(x=>x!==d.place)).slice(0,8);ls.set('ph_hi',HI);drawRec();
+ // stats + actions
+ const ys=(d.timeline||[]).map(e=>e.year).filter(y=>typeof y==='number');
+ const stt=E('div','stats');[['Names',(d.names||[]).length],['Sources',(d.sources||[]).length],['Events',(d.timeline||[]).length],['Years covered',ys.length?Math.max(...ys,2026)-Math.min(...ys):0]].forEach(([k,v])=>{const s=E('div','st'),n=E('b',null,'0');s.append(n,E('span',null,k));stt.appendChild(s);count(n,v)});
+ const ab=E('div','row act');
+ const fb=E('button',null,'');const fu=()=>{const on=FV.includes(d.place);fb.textContent=on?'⭐ Saved':'☆ Save place';fb.classList.toggle('on',on)};fu();
+ fb.onclick=()=>{FV=FV.includes(d.place)?FV.filter(x=>x!==d.place):FV.concat(d.place);ls.set('ph_fv',FV);fu();drawRec()};
+ const cb=E('button',null,'📋 Copy');cb.onclick=async()=>{try{await navigator.clipboard.writeText(md(d));cb.textContent='✅ Copied'}catch(e){cb.textContent='Copy not allowed'}setTimeout(()=>cb.textContent='📋 Copy',1800)};
+ const lb=E('button',null,'🔊 Listen');lb.onclick=()=>say([d.place,d.summary].join('. '));
+ ab.append(fb,cb,lb);
+ const db=E('button',null,'⬇ Report (.md)');db.onclick=()=>{const blob=new Blob([md(d)],{type:'text/markdown;charset=utf-8'});const url=URL.createObjectURL(blob);const a=E('a');a.href=url;a.download=d.place.replace(/[^\w\u0B80-\u0BFF]+/g,'_')+'_history.md';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)};ab.appendChild(db);
+ o.firstChild.after(ab,stt);
+ // timeline filters
+ const tl=o.querySelector('.tl');
+ if(tl){const arr=(d.timeline||[]).slice().sort((a,b)=>a.year-b.year);[...tl.children].forEach((e,i)=>e.dataset.k=(arr[i]||{}).kind||'event');
+  const f=E('div','fl2');[['all','All'],['name','Names'],['event','Events'],['water','Water'],['culture','Culture']].forEach(([k,t],i)=>{const b=E('button',i?'':'on',t);b.onclick=()=>{f.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');[...tl.children].forEach(e=>e.classList.toggle('hid',k!=='all'&&e.dataset.k!==k))};f.appendChild(b)});tl.before(f)}
+ // autoplay slider
+ const rg=o.querySelector('input[type=range]');
+ if(rg){const pb=E('button',null,'▶ Play history');pb.style.marginTop='8px';let tm=null;pb.onclick=()=>{if(tm){clearInterval(tm);tm=null;pb.textContent='▶ Play history';return}pb.textContent='⏸ Pause';rg.value=rg.min;const step=(rg.max-rg.min)/160;tm=setInterval(()=>{rg.value=+rg.value+step;rg.dispatchEvent(new Event('input'));if(+rg.value>=+rg.max){clearInterval(tm);tm=null;pb.textContent='▶ Play history'}},60)};rg.after(pb)}
+ // ask historian
+ const c=E('div','card');c.appendChild(E('h2',null,'💬 Ask the historian about '+d.place));
+ const r=E('div','row'),qi=E('input');qi.type='text';qi.placeholder='e.g. Why was the name changed? Who was the king then?';const qb=E('button',null,'Ask');r.append(qi,qb);const ans=E('div','ans');c.append(r,ans);o.appendChild(c);
+ const ask=async()=>{const q=qi.value.trim();if(!q)return;
+  ans.textContent='Thinking…';try{ans.textContent=await askPlaceAI('ask','You are a careful historian of Tamil place names. Answer in '+(/[\u0B80-\u0BFF]/.test(q)?'Tamil':'English')+' in under 180 words. Distinguish established facts from uncertain claims. Never invent inscriptions, quotations, sources or exact dates; say when unsure. Context (earlier research may contain errors): '+JSON.stringify({place:d.place,current:d.current_name,summary:d.summary,names:d.names,timeline:(d.timeline||[]).map(e=>e.year+' '+e.title)})+'\nQuestion: '+q)}catch(e){ans.textContent='Could not answer: '+(e.message||'unknown error')+'.'}};
+ qb.onclick=ask;qi.addEventListener('keydown',e=>{if(e.key==='Enter')ask()});
+ [...o.children].forEach((el,i)=>reveal(el,i));
+};
+drawRec();
+document.querySelector('main h1').after(Object.assign(E('div','mute'),{id:'tag',textContent:'✦ Names · Rivers · Inscriptions · Palm-leaf · Maps · Timeline ✦'}));
+})();
+</script>
+</body>
+</html>
